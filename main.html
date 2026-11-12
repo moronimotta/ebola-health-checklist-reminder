@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ebola Travel Checklist Reminder</title>
+<style>
+:root{--bg:#f4f1ea;--card:#fff;--text:#1f2933;--muted:#52606d;--navy:#12304a;--teal:#0f766e;--accent:#d9480f;--line:#d9d4c7;--btn-text:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1a26;--card:#16283a;--text:#e8edf2;--muted:#a9b6c3;--navy:#e8edf2;--teal:#2dd4bf;--accent:#fb923c;--line:#2c4258;--btn-text:#0e1a26;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1a26;--card:#16283a;--text:#e8edf2;--muted:#a9b6c3;--navy:#e8edf2;--teal:#2dd4bf;--accent:#fb923c;--line:#2c4258;--btn-text:#0e1a26;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Segoe UI",Calibri,Roboto,Helvetica,Arial,sans-serif;line-height:1.5}
+main{max-width:640px;margin:0 auto;padding:20px 16px 40px}
+h1{font-family:Georgia,"Times New Roman",serif;color:var(--navy);font-size:1.7rem;line-height:1.2;margin:8px 0 6px}
+.sub{color:var(--muted);margin:0 0 18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+h2{font-size:1rem;margin:0 0 10px;color:var(--teal);text-transform:uppercase;letter-spacing:.04em}
+label{display:block;font-weight:600;margin:10px 0 4px}
+input,select{width:100%;font:inherit;padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text)}
+.btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.btn{flex:1 1 200px;text-align:center;text-decoration:none;font-weight:700;padding:12px 14px;border-radius:8px;background:var(--teal);color:var(--btn-text)}
+.btn[aria-disabled="true"]{opacity:.45;cursor:not-allowed}
+#msg{margin:10px 0 0;color:var(--accent);font-weight:600;min-height:1.4em}
+ul.check{list-style:none;padding:0;margin:0}
+ul.check li{padding:8px 0 8px 30px;position:relative;border-bottom:1px solid var(--line)}
+ul.check li:last-child{border-bottom:0}
+ul.check li::before{content:"";position:absolute;left:2px;top:12px;width:16px;height:16px;border:2px solid var(--teal);border-radius:4px}
+.note{color:var(--muted);font-size:.9rem}
+a{color:var(--teal)}
+</style>
+</head>
+<body>
+<main>
+<h1>Know Before You Go: Ebola Travel Checklist</h1>
+<p class="sub">Pick your travel date and add a reminder, with the checklist inside, to your calendar.</p>
+
+<section class="card" aria-labelledby="h-date">
+<h2 id="h-date">1. Set your travel date</h2>
+<label for="date">Travel date</label>
+<input type="date" id="date">
+<label for="lead">Remind me</label>
+<select id="lead">
+<option value="1">1 day before</option>
+<option value="3" selected>3 days before</option>
+<option value="7">7 days before</option>
+</select>
+<div class="btns">
+<a class="btn" id="g" href="#" target="_blank" rel="noopener" aria-disabled="true">Add to Google Calendar</a>
+<a class="btn" id="o" href="#" target="_blank" rel="noopener" aria-disabled="true">Add to Outlook Calendar</a>
+</div>
+<p id="msg" role="status"></p>
+</section>
+
+<section class="card" aria-labelledby="h-list">
+<h2 id="h-list">2. What the reminder will contain</h2>
+<ul class="check" id="list"></ul>
+<p class="note">Based on CDC guidance as of November 2026. Rules change quickly, so check <a href="https://www.cdc.gov/ebola/situation-summary/index.html" target="_blank" rel="noopener">cdc.gov/ebola</a> before you go.</p>
+</section>
+</main>
+<script>
+(function(){
+var items=[
+"Check CDC travel notices for your destination (cdc.gov/ebola).",
+"In DR Congo in the last 21 days? You cannot board a US-bound flight until 21 days after you leave.",
+"In Uganda or South Sudan? US citizens are screened at IAD, ATL or JFK.",
+"Avoid blood and body fluids of sick people. Wash your hands often.",
+"After travel, watch for 21 days for fever (100.4F), headache and body aches.",
+"Sick? Isolate, call your health department, and do not travel.",
+"Rules change fast. Recheck cdc.gov/ebola before you go."
+];
+var list=document.getElementById("list");
+items.forEach(function(t){var li=document.createElement("li");li.textContent=t;list.appendChild(li);});
+var dateEl=document.getElementById("date"),leadEl=document.getElementById("lead"),g=document.getElementById("g"),o=document.getElementById("o"),msg=document.getElementById("msg");
+function pad(n){return (n<10?"0":"")+n;}
+function iso(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
+function compact(d){return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate());}
+function parse(s){var p=s.split("-");return new Date(+p[0],+p[1]-1,+p[2]);}
+function addDays(d,n){var x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()+n);return x;}
+var today=new Date();today=new Date(today.getFullYear(),today.getMonth(),today.getDate());
+dateEl.min=iso(today);
+function update(){
+ if(!dateEl.value){g.setAttribute("aria-disabled","true");o.setAttribute("aria-disabled","true");g.href="#";o.href="#";return;}
+ var trip=parse(dateEl.value),lead=+leadEl.value,rem=addDays(trip,-lead);
+ if(rem<today){rem=today;}
+ var next=addDays(rem,1);
+ var nice=trip.toLocaleDateString(undefined,{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+ var title="Ebola travel checklist (trip on "+dateEl.value+")";
+ var body="EBOLA TRAVEL CHECKLIST (CDC guidance, Nov 2026)\nYour trip: "+nice+"\n\n"+items.map(function(t){return "[ ] "+t;}).join("\n");
+ g.href="https://calendar.google.com/calendar/render?action=TEMPLATE&text="+encodeURIComponent(title)+"&dates="+compact(rem)+"/"+compact(next)+"&details="+encodeURIComponent(body);
+ o.href="https://outlook.live.com/calendar/0/deeplink/compose?path=%2Fcalendar%2Faction%2Fcompose&rru=addevent&allday=true&subject="+encodeURIComponent(title)+"&startdt="+iso(rem)+"&enddt="+iso(next)+"&body="+encodeURIComponent(body);
+ g.removeAttribute("aria-disabled");o.removeAttribute("aria-disabled");
+ msg.textContent=(rem.getTime()===today.getTime()&&addDays(trip,-lead)<today)?"Your trip is soon, so the reminder is set for today.":"";
+}
+[g,o].forEach(function(a){a.addEventListener("click",function(e){if(a.getAttribute("aria-disabled")==="true"){e.preventDefault();msg.textContent="Please choose your travel date first.";}});});
+dateEl.addEventListener("input",update);dateEl.addEventListener("change",update);leadEl.addEventListener("change",update);
+update();
+})();
+</script>
+</body>
+</html>
